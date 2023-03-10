@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Wish List</title>
+    <style>
+        body {
+            text-align: left;
+            margin: 10px;
+            font-family: 'Montserrat', sans-serif;
+            font-style: normal;
+        }
+
+        form {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        input[type="text"] {
+            display: inline-block;
+            margin: 20px auto;
+            border: 2px solid #eee;
+            padding: 10px 20px;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 16px;
+            border-radius: 25px;
+            width: 900px;
+            text-align: left;
+        }
+
+        button[type="submit"] {
+            display: inline-block;
+            margin: 20px auto;
+            border: 2px solid #eee;
+            padding: 10px 20px;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 16px;
+            border-radius: 25px;
+            width: auto;
+            text-align: center;
+            background: #E4E9F4;
+            border: none;
+        }
+
+        .delete-btn {
+            display: inline-block;
+            margin: 18px auto;
+            border: 2px solid #eee;
+            padding: 8px 16px;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 14px;
+            border-radius: 25px;
+            width: auto;
+            text-align: center;
+            background: #E4E9F4;
+            border: none;
+        }
+
+        .edit-btn {
+            display: inline-block;
+            margin: 18px auto;
+            border: 2px solid #eee;
+            padding: 8px 16px;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 14px;
+            border-radius: 25px;
+            width: auto;
+            text-align: center;
+            background: #E4E9F4;
+            border: none;
+        }
+
+        li {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            text-align: left;
+            padding: 10px;
+            cursor: default;
+            border-radius: 25px;
+            width: auto;
+            margin-bottom: 5px;
+            list-style-type: none;
+            background: #E4E9F4;
+            border: none;
+        }
+
+        #sort-btn {
+            display: inline-block;
+            margin: 20px auto;
+            border: 2px solid #eee;
+            padding: 10px 20px;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 16px;
+            border-radius: 25px;
+            width: auto;
+            text-align: center;
+            background: #E4E9F4;
+            border: none;
+        }
+
+        ul {
+            padding-left: 0;
+        }
+
+        button[type="submit"]:hover {
+            background-color: #3330DD;
+            color: white;
+        }
+
+        .delete-btn:hover {
+            background-color: #3330DD;
+            color: white;
+            border: none;
+        }
+
+        .edit-btn:hover {
+            background-color: #3330DD;
+            color: white;
+            border: none;
+        }
+
+        li:hover {
+            background-color: #CFEFF9;
+        }
+
+        #sort-btn:hover {
+            background-color: #3330DD;
+            color: white;
+        }
+</style>
+</head>
+<body>
+    <div class="container" style="width: 1000px; margin: auto;">
+        <h2>Список пожеланий</h2>
+        <form id="wish-form">
+            <input type="text" id="wish-input" placeholder="Название подарка">
+            <button type="submit">Добавить</button>
+            <button id="sort-btn">Сортировка</button>
+        </form>
+        <ul id="wish-list">
+        </ul>
+    </div>
+
+    <script>
+            const form = document.querySelector('#wish-form');
+            const input = document.querySelector('#wish-input');
+            const list = document.querySelector('#wish-list');
+            const sortBtn = document.querySelector('#sort-btn');
+
+            if (localStorage.getItem('list')?.length > 0) {
+                
+                const memoryList = JSON.parse(localStorage.getItem('list'))
+                memoryList.forEach(item => {
+                    const newListItem = createListItem(item)
+                    list.appendChild(newListItem);
+                })
+            }
+            else {
+                localStorage.setItem('list', JSON.stringify([]))
+            }
+
+            // функция для создания нового элемента списка
+            function createListItem(text) {
+
+                const li = document.createElement('li');
+                const span = document.createElement('span');
+                const editBtn = document.createElement('button');
+                const deleteBtn = document.createElement('button');
+                const sortBtn = document.querySelector('sort-btn');
+
+                const buttonWrapper = document.createElement('div')
+
+
+
+                span.textContent = text;
+                editBtn.textContent = 'Редактировать';
+                deleteBtn.textContent = 'Удалить';
+
+                editBtn.classList.add('edit-btn');
+                deleteBtn.classList.add('delete-btn');
+
+                li.appendChild(span);
+                buttonWrapper.appendChild(editBtn);
+                buttonWrapper.appendChild(deleteBtn);
+
+                li.appendChild(buttonWrapper)
+
+                return li;
+            }
+
+            // обработчик события на отправку формы
+            form.addEventListener('submit', event => {
+                event.preventDefault();
+
+                const text = input.value.trim();
+
+                if (text === '') {
+                    return;
+                }
+
+                const li = createListItem(text);
+
+                list.appendChild(li);
+
+
+                const storageList = JSON.parse(localStorage.getItem('list'))
+                localStorage.setItem('list', JSON.stringify([...storageList, text]))
+
+                input.value = '';
+            });
+
+            // обработчик событий на клик по кнопкам редактирования и удаления
+            list.addEventListener('click', event => {
+                const target = event.target;
+
+                if (target.classList.contains('delete-btn')) {
+                    const li = target.closest('li');
+                    const span = li.querySelector("span")
+                    
+                    const memory = JSON.parse(localStorage.getItem('list'))
+                    memory.splice(memory.indexOf(span.textContent), 1)
+                    localStorage.setItem('list', JSON.stringify(memory))
+
+                    list.removeChild(li);
+                } else if (target.classList.contains('edit-btn')) {
+                    const li = target.closest('li');
+                    const span = li.querySelector('span');
+                    const text = span.textContent;
+                    input.value = text;
+                    const memory = JSON.parse(localStorage.getItem('list'))
+                    memory.splice(memory.indexOf(text), 1)
+                    localStorage.setItem('list', JSON.stringify(memory))
+                    list.removeChild(li);
+                }
+            });
+
+            // обработчик события на клик по кнопке сортировки
+            sortBtn.addEventListener('click', () => {
+                const items = Array.from(list.children);
+
+                items.sort((a, b) => {
+                    const textA = a.querySelector('span').textContent.toLowerCase();
+                    const textB = b.querySelector('span').textContent.toLowerCase();
+
+                    if (textA < textB) {
+                        return -1;
+                    }
+
+                    if (textA > textB) {
+                        return 1;
+                    }
+
+                    return 0;
+                });
+
+                items.forEach(item => list.appendChild(item));
+            });
+    </script>
+</body>
+</html>
+
+
